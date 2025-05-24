@@ -1,0 +1,30 @@
+import pandas as pd
+import numpy as np
+
+# Generate regime-switching data
+np.random.seed(42)
+dates = pd.date_range('2020-01-01', '2023-01-01')
+n = len(dates)
+
+# Create 4 different regimes
+regime_length = n // 4
+returns = np.concatenate([
+    np.random.normal(0.001, 0.005, regime_length),    # Bull market
+    np.random.normal(-0.0005, 0.02, regime_length),   # Bear market
+    np.random.normal(0.0002, 0.015, regime_length),   # High volatility
+    np.random.normal(0.0007, 0.008, n-3*regime_length) # Normal
+])
+
+close = 100 * (1 + returns).cumprod()
+regimes = ['bull']*regime_length + ['bear']*regime_length + \
+          ['high_vol']*regime_length + ['normal']*(n-3*regime_length)
+
+df = pd.DataFrame({
+    'Date': dates,
+    'Close': close,
+    'Regime': regimes,
+    'Volume': np.random.lognormal(15, 1, n)
+})
+
+# Save as parquet
+df.to_parquet('data/synthetic/regime_data_2023.parquet')

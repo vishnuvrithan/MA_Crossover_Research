@@ -1,0 +1,22 @@
+import pandas as pd
+import numpy as np
+
+# Generate synthetic processed data
+np.random.seed(42)
+dates = pd.date_range('2020-01-01', '2023-01-01')
+n = len(dates)
+returns = np.random.normal(0.0005, 0.01, n)
+close = 100 * (1 + returns).cumprod()
+
+# Create features
+df = pd.DataFrame({
+    'Date': dates,
+    'Close': close,
+    'SMA_50': close.rolling(50).mean(),
+    'SMA_200': close.rolling(200).mean(),
+    'Volatility': close.pct_change().rolling(20).std(),
+    'Volume': np.random.lognormal(15, 1, n)
+}).dropna()
+
+# Save as feather
+df.reset_index(drop=True).to_feather('data/processed/prepared_data.feather')
